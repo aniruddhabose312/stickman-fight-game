@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stickman Clash: Arcade Fighting Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Main Game Container -->
+    <div id="game-wrapper">
+        <canvas id="gameCanvas"></canvas>
+
+        <!-- Dynamic In-Fight HUD -->
+        <div id="hud-container" class="hidden">
+            <!-- Player 1 HUD (Left) -->
+            <div class="fighter-hud p1-hud">
+                <div class="fighter-info">
+                    <span id="p1-name-display" class="fighter-name">CYAN HERO</span>
+                    <div id="p1-rounds-indicator" class="rounds-indicator">
+                        <span class="round-dot"></span>
+                        <span class="round-dot"></span>
+                    </div>
+                </div>
+                <!-- Dual-layer Health Bar displaying real-time reduction & drain -->
+                <div class="health-bar-container">
+                    <div id="p1-hp-drain" class="health-drain"></div>
+                    <div id="p1-hp-fill" class="health-fill"></div>
+                    <div id="p1-hp-text" class="health-numbers">100 / 100</div>
+                </div>
+                <!-- Super / Energy Gauge -->
+                <div class="super-meter-container">
+                    <div id="p1-super-fill" class="super-fill"></div>
+                </div>
+            </div>
+
+            <!-- Center Match Timer -->
+            <div class="center-hud">
+                <div id="match-timer" class="timer-box">90</div>
+            </div>
+
+            <!-- Player 2 / CPU HUD (Right) -->
+            <div class="fighter-hud p2-hud">
+                <div class="fighter-info">
+                    <div id="p2-rounds-indicator" class="rounds-indicator">
+                        <span class="round-dot"></span>
+                        <span class="round-dot"></span>
+                    </div>
+                    <span id="p2-name-display" class="fighter-name">RED SHADOW</span>
+                </div>
+                <!-- Dual-layer Health Bar displaying real-time reduction & drain -->
+                <div class="health-bar-container">
+                    <div id="p2-hp-drain" class="health-drain"></div>
+                    <div id="p2-hp-fill" class="health-fill"></div>
+                    <div id="p2-hp-text" class="health-numbers">100 / 100</div>
+                </div>
+                <!-- Super / Energy Gauge -->
+                <div class="super-meter-container">
+                    <div id="p2-super-fill" class="super-fill"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Menu Overlay -->
+        <div id="main-menu-overlay" class="overlay">
+            <h1 class="game-title">STICKMAN CLASH</h1>
+            <div class="game-subtitle">CYBER SHADOW TOURNAMENT</div>
+
+            <div class="menu-buttons">
+                <button id="btn-play-cpu" class="arcade-btn primary">1 Player vs Computer</button>
+                <button id="btn-play-pvp" class="arcade-btn">2 Player (Local PvP)</button>
+                <button id="btn-play-practice" class="arcade-btn">Training / Practice</button>
+                <button id="btn-controls-guide" class="arcade-btn">Controls & Combos</button>
+            </div>
+
+            <div class="settings-row">
+                <span>CPU Difficulty:</span>
+                <select id="difficulty-select" class="select-pill">
+                    <option value="easy">Easy (Casual)</option>
+                    <option value="medium" selected>Medium (Standard)</option>
+                    <option value="hard">Hard (Master AI)</option>
+                </select>
+            </div>
+
+            <div class="settings-row">
+                <span>Arena Stage:</span>
+                <select id="stage-select" class="select-pill">
+                    <option value="cyber" selected>Neon Cyber Rooftop</option>
+                    <option value="sunset">Sunset Pagoda Dojo</option>
+                    <option value="cage">Underground Cage</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Controls & Combos Guide Modal -->
+        <div id="controls-modal" class="overlay hidden">
+            <div class="modal-card">
+                <div class="modal-title">Fight Controls</div>
+                <div class="controls-grid">
+                    <!-- Player 1 Controls -->
+                    <div class="controls-box p1-box">
+                        <div class="controls-box-title">PLAYER 1 (HERO)</div>
+                        <div class="control-item"><span>Move Left / Right</span><span class="key-badge">A / D</span></div>
+                        <div class="control-item"><span>Jump (Airborne)</span><span class="key-badge">W</span></div>
+                        <div class="control-item"><span>Crouch / Guard</span><span class="key-badge">S or Space</span></div>
+                        <div class="control-item"><span>Light Punch (Jab)</span><span class="key-badge">F</span></div>
+                        <div class="control-item"><span>Heavy Kick (Roundhouse)</span><span class="key-badge">G</span></div>
+                        <div class="control-item"><span>Jump Dive Kick</span><span class="key-badge">Air + G</span></div>
+                        <div class="control-item"><span>Super Dragon Rush</span><span class="key-badge">R (50% Super)</span></div>
+                    </div>
+
+                    <!-- Player 2 Controls -->
+                    <div class="controls-box p2-box">
+                        <div class="controls-box-title">PLAYER 2 (PVP)</div>
+                        <div class="control-item"><span>Move Left / Right</span><span class="key-badge">← / →</span></div>
+                        <div class="control-item"><span>Jump (Airborne)</span><span class="key-badge">↑</span></div>
+                        <div class="control-item"><span>Crouch / Guard</span><span class="key-badge">↓ or Num 0</span></div>
+                        <div class="control-item"><span>Light Punch (Jab)</span><span class="key-badge">J or Num 1</span></div>
+                        <div class="control-item"><span>Heavy Kick (Roundhouse)</span><span class="key-badge">K or Num 2</span></div>
+                        <div class="control-item"><span>Jump Dive Kick</span><span class="key-badge">Air + K</span></div>
+                        <div class="control-item"><span>Super Shadow Strike</span><span class="key-badge">L or Num 3</span></div>
+                    </div>
+                </div>
+                <button id="btn-close-controls" class="arcade-btn primary" style="width: 100%;">Got It! Back to Menu</button>
+            </div>
+        </div>
+
+        <!-- Pause Menu Overlay -->
+        <div id="pause-menu-overlay" class="overlay hidden">
+            <h2 class="game-title" style="font-size: 38px;">BATTLE PAUSED</h2>
+            <div class="menu-buttons" style="margin-top: 15px;">
+                <button id="btn-resume" class="arcade-btn primary">Resume Battle</button>
+                <button id="btn-restart-round" class="arcade-btn">Restart Round</button>
+                <button id="btn-menu-from-pause" class="arcade-btn danger">Return to Main Menu</button>
+            </div>
+        </div>
+
+        <!-- Game Over / Victory Overlay -->
+        <div id="game-over-overlay" class="overlay hidden">
+            <h2 class="game-title" style="font-size: 42px;">MATCH FINISHED</h2>
+            <div id="game-over-winner-text" class="winner-banner">CYAN HERO WINS!</div>
+            <div class="menu-buttons">
+                <button id="btn-rematch" class="arcade-btn primary">Play Rematch</button>
+                <button id="btn-game-over-menu" class="arcade-btn">Main Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Controls & Sound Bar Below Canvas -->
+    <div id="controls-bar">
+        <div class="bar-keys">
+            <div class="bar-key-group">
+                <strong style="color: var(--neon-cyan)">P1:</strong>
+                <span>WASD</span> + 
+                <span class="key-badge">F</span> Punch 
+                <span class="key-badge">G</span> Kick 
+                <span class="key-badge">R</span> Super 
+                <span class="key-badge">S / Space</span> Guard
+            </div>
+            <div class="bar-key-group">
+                <strong style="color: var(--neon-red)">P2 / 2-Player:</strong>
+                <span>Arrows</span> + 
+                <span class="key-badge">J / Num 1</span> Punch 
+                <span class="key-badge">K / Num 2</span> Kick 
+                <span class="key-badge">L / Num 3</span> Super 
+                <span class="key-badge">↓</span> Guard
+            </div>
+        </div>
+        <div class="bar-buttons">
+            <button id="btn-toggle-music" class="mini-btn">🎵 Music: Off</button>
+            <button id="btn-toggle-sfx" class="mini-btn">🔊 SFX: On</button>
+            <button id="btn-open-controls-bar" class="mini-btn">❓ Help</button>
+        </div>
+    </div>
+
+    <!-- Scripts in logical dependency order -->
+    <script src="js/audio.js"></script>
+    <script src="js/particles.js"></script>
+    <script src="js/stickman.js"></script>
+    <script src="js/ai.js"></script>
+    <script src="js/game.js"></script>
+
+    <!-- UI Event Wiring -->
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const game = new StickmanGame();
+            window.activeGame = game;
+
+            // Main Menu Buttons
+            const btnCpu = document.getElementById('btn-play-cpu');
+            const btnPvp = document.getElementById('btn-play-pvp');
+            const btnPractice = document.getElementById('btn-play-practice');
+            const btnControlsGuide = document.getElementById('btn-controls-guide');
+            const btnCloseControls = document.getElementById('btn-close-controls');
+            const btnOpenControlsBar = document.getElementById('btn-open-controls-bar');
+            const controlsModal = document.getElementById('controls-modal');
+
+            const difficultySelect = document.getElementById('difficulty-select');
+            const stageSelect = document.getElementById('stage-select');
+
+            // 1 Player vs Computer
+            btnCpu.addEventListener('click', () => {
+                const diff = difficultySelect.value;
+                game.setStage(stageSelect.value);
+                game.startMatch(GameMode.VS_CPU, diff);
+            });
+
+            // 2 Player Local PvP
+            btnPvp.addEventListener('click', () => {
+                game.setStage(stageSelect.value);
+                game.startMatch(GameMode.VS_PLAYER);
+            });
+
+            // Training / Practice Mode
+            btnPractice.addEventListener('click', () => {
+                game.setStage(stageSelect.value);
+                game.startMatch(GameMode.PRACTICE);
+            });
+
+            // Controls modal
+            btnControlsGuide.addEventListener('click', () => {
+                controlsModal.classList.remove('hidden');
+            });
+            btnOpenControlsBar.addEventListener('click', () => {
+                controlsModal.classList.remove('hidden');
+            });
+            btnCloseControls.addEventListener('click', () => {
+                controlsModal.classList.add('hidden');
+            });
+
+            // Stage Select change
+            stageSelect.addEventListener('change', (e) => {
+                game.setStage(e.target.value);
+            });
+
+            // Pause Menu buttons
+            document.getElementById('btn-resume').addEventListener('click', () => {
+                game.togglePause();
+            });
+            document.getElementById('btn-restart-round').addEventListener('click', () => {
+                game.togglePause();
+                game.startRound();
+            });
+            document.getElementById('btn-menu-from-pause').addEventListener('click', () => {
+                game.showMainMenu();
+            });
+
+            // Game Over buttons
+            document.getElementById('btn-rematch').addEventListener('click', () => {
+                game.startMatch(game.mode, game.difficulty);
+            });
+            document.getElementById('btn-game-over-menu').addEventListener('click', () => {
+                game.showMainMenu();
+            });
+
+            // Audio & Music Controls
+            const btnMusic = document.getElementById('btn-toggle-music');
+            const btnSfx = document.getElementById('btn-toggle-sfx');
+
+            btnMusic.addEventListener('click', () => {
+                const isPlaying = game.audio.toggleMusic();
+                btnMusic.innerText = isPlaying ? '🎵 Music: On' : '🎵 Music: Off';
+                btnMusic.style.color = isPlaying ? 'var(--neon-cyan)' : '';
+            });
+
+            btnSfx.addEventListener('click', () => {
+                const isMuted = game.audio.toggleMute();
+                btnSfx.innerText = isMuted ? '🔇 SFX: Muted' : '🔊 SFX: On';
+                btnSfx.style.color = isMuted ? '#ff5252' : '';
+            });
+        });
+    </script>
+</body>
+</html>
